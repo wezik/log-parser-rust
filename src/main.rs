@@ -1,5 +1,6 @@
 #[cfg(debug_assertions)]
 mod test_file_generator;
+mod database;
 
 fn main() {
     #[cfg(debug_assertions)]
