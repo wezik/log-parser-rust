@@ -11,16 +11,26 @@ use diesel::Queryable;
 pub struct FinishedLog {
     pub id: i64,
     pub timestamp: Option<i64>,
+    pub log_id: i64,
 }
 
 #[derive(Queryable, Debug)]
 pub struct StartingLog {
     pub id: i64,
     pub timestamp: Option<i64>,
+    pub log_id: i64,
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = finished_logs)]
-pub struct NewLog {
+#[diesel(table_name = starting_logs)]
+pub struct NewStartingLog {
     pub timestamp: i64,
+    pub log_id: i64,
+}
+
+#[derive(Insertable, Debug)]
+#[diesel(table_name = finished_logs)]
+pub struct NewFinishedLog {
+    pub timestamp: i64,
+    pub log_id: i64,
 }
