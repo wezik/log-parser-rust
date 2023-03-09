@@ -26,10 +26,10 @@ fn write_to_file(writer: &mut BufWriter<File>, logs: &mut Vec<String>) {
 }
 
 fn generate_logs(amount: u128, writer: &mut BufWriter<File>) {
-    let amount =  amount / 2;
+    let amount = amount / 2;
     let started = "STARTED";
     let finished = "FINISHED";
-    let flag_point = (amount / 10 * 7) as u128;
+    let flag_point = amount / 10 * 7;
     let batch = 5000000;
     let mut log_threshold = batch;
     let mut logs = Vec::new();
