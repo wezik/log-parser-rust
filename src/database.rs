@@ -37,7 +37,11 @@ pub fn save_finished_logs(logs: &Vec<NewFinishedLog>, connection: &mut PgConnect
 }
 
 fn split_logs<T: Clone>(logs: &Vec<T>, parameters: usize) -> Vec<&[T]> {
-    // turns out diesel isn't capped on n of elements passed but n of parameters of these elements
+    /*
+       Hard coded value 65535 is a maximum n of params that can be passed to diesel insert,
+       params however describe an n of variables passed not a vector length
+       https://github.com/diesel-rs/diesel/issues/2414#issuecomment-635311607
+    */
     let max_size = 65535 / parameters;
     let num_splits = (logs.len() + max_size - 1) / max_size;
     let mut result = Vec::with_capacity(num_splits);
