@@ -1,3 +1,4 @@
+use diesel::PgConnection;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Read};
@@ -181,7 +182,11 @@ pub fn interpret(
     })
 }
 
-pub fn save_starts(r_logs: Receiver<NewStartingLog>, s_tracker: Sender<Tracker>) -> JoinHandle<()> {
+fn save_loop<T, U>(r_logs: Receiver<T>, s_tracker: Sender<Tracker>, save_logs: U) -> JoinHandle<()>
+where
+    T: Send + 'static,
+    U: Fn(&Vec<T>, &mut PgConnection) + Send + Sync + 'static,
+{
     spawn(move || {
         let mut connection = database::establish_connection();
         let batch_size = 65535;
@@ -189,7 +194,7 @@ pub fn save_starts(r_logs: Receiver<NewStartingLog>, s_tracker: Sender<Tracker>)
         for log in r_logs {
             batch.push(log);
             if batch.len() >= batch_size {
-                database::save_starting_logs(&batch, &mut connection);
+                save_logs(&batch, &mut connection);
                 s_tracker
                     .send(Tracker {
                         bytes_read: 0,
@@ -201,7 +206,7 @@ pub fn save_starts(r_logs: Receiver<NewStartingLog>, s_tracker: Sender<Tracker>)
                 batch.clear();
             }
         }
-        database::save_starting_logs(&batch, &mut connection);
+        save_logs(&batch, &mut connection);
         s_tracker
             .send(Tracker {
                 bytes_read: 0,
@@ -210,42 +215,18 @@ pub fn save_starts(r_logs: Receiver<NewStartingLog>, s_tracker: Sender<Tracker>)
                 logs_message: None,
             })
             .expect("Failed to send tracking data");
+        batch.clear();
     })
 }
 
+pub fn save_starts(r_logs: Receiver<NewStartingLog>, s_tracker: Sender<Tracker>) -> JoinHandle<()> {
+    save_loop(r_logs, s_tracker, database::save_starting_logs)
+}
+
 pub fn save_finishes(
-    r_logs: Receiver<NewFinishedLog>,
-    s_tracker: Sender<Tracker>,
+    r_logs: Receiver<NewFinishedLog>, s_tracker: Sender<Tracker>,
 ) -> JoinHandle<()> {
-    spawn(move || {
-        let mut connection = database::establish_connection();
-        let batch_size = 65535;
-        let mut batch = Vec::with_capacity(batch_size);
-        for log in r_logs {
-            batch.push(log);
-            if batch.len() >= batch_size {
-                database::save_finished_logs(&batch, &mut connection);
-                s_tracker
-                    .send(Tracker {
-                        bytes_read: 0,
-                        logs_found: 0,
-                        logs_saved: batch.len() as u64,
-                        logs_message: None,
-                    })
-                    .expect("Failed to send tracking data");
-                batch.clear();
-            }
-        }
-        database::save_finished_logs(&batch, &mut connection);
-        s_tracker
-            .send(Tracker {
-                bytes_read: 0,
-                logs_found: 0,
-                logs_saved: batch.len() as u64,
-                logs_message: None,
-            })
-            .expect("Failed to send tracking data");
-    })
+    save_loop(r_logs, s_tracker, database::save_finished_logs)
 }
 
 pub struct Tracker {
