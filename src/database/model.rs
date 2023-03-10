@@ -3,9 +3,10 @@
 #![allow(unused)]
 #![allow(clippy::all)]
 
-use super::schema::*;
 use diesel::Insertable;
 use diesel::Queryable;
+
+use super::schema::*;
 
 #[derive(Queryable, Debug)]
 pub struct FinishedLog {
@@ -21,14 +22,14 @@ pub struct StartingLog {
     pub log_id: i64,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug, Clone)]
 #[diesel(table_name = starting_logs)]
 pub struct NewStartingLog {
     pub timestamp: i64,
     pub log_id: i64,
 }
 
-#[derive(Insertable, Debug)]
+#[derive(Insertable, Debug, Clone)]
 #[diesel(table_name = finished_logs)]
 pub struct NewFinishedLog {
     pub timestamp: i64,
