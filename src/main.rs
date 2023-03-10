@@ -1,6 +1,9 @@
+use crate::database::model::{NewFinishedLog, NewStartingLog};
+
+mod database;
+mod parser;
 #[cfg(debug_assertions)]
 mod test_file_generator;
-mod database;
 
 fn main() {
     #[cfg(debug_assertions)]
@@ -8,5 +11,8 @@ fn main() {
         //20000000 records would produce ~3 GB file
         test_file_generator::run(20000000);
     }
+
+    parser::parse();
+
     println!("Hello world");
 }
