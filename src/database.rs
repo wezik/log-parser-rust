@@ -1,9 +1,9 @@
-use diesel::{Connection, PgConnection, RunQueryDsl, Table};
+use diesel::{Connection, PgConnection, RunQueryDsl};
 
 use schema::finished_logs;
 use schema::starting_logs;
 
-use crate::database::model::{FinishedLog, NewFinishedLog, NewStartingLog, StartingLog};
+use crate::database::model::{NewFinishedLog, NewStartingLog};
 
 pub mod model;
 pub mod schema;

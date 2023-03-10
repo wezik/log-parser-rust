@@ -12,7 +12,7 @@ fn main() {
         test_file_generator::run(20000000);
     }
 
-    parser::parse();
+    parser::parse("test_m.txt");
 
     println!("Hello world");
 }
