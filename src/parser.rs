@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::BufReader;
 use std::sync::mpsc;
@@ -11,7 +12,7 @@ mod task;
 
 pub fn parse(path: &str) {
     let (s_tracker, r_tracker) = mpsc::channel::<Tracker>();
-    let (s_reader, r_reader) = mpsc::sync_channel::<Vec<char>>(2048000);
+    let (s_reader, r_reader) = mpsc::sync_channel::<VecDeque<char>>(2048000);
     let (s_start_logs, r_start_logs) = mpsc::sync_channel::<NewStartingLog>(512000);
     let (s_finish_logs, r_finish_logs) = mpsc::sync_channel::<NewFinishedLog>(512000);
 
